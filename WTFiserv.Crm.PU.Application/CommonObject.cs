@@ -27,7 +27,6 @@ namespace WTFiserv.Crm.PU.Application
                 {
                     EntityFilters = Microsoft.Xrm.Sdk.Metadata.EntityFilters.Attributes,
                     LogicalName = EntityName
-
                 };
                 RetrieveEntityResponse response = service.Execute(request) as RetrieveEntityResponse;
                 var retval = response.EntityMetadata.Attributes
@@ -67,20 +66,13 @@ namespace WTFiserv.Crm.PU.Application
                         log.Info(fileName + " added to the list of files to process");
                     }
                 }
-                else if(!fileName.Contains("ProspectUpdatesExecutionON"))
+                else if(!fileName.Contains("ProspectUpdatesExecutionON") && !fileName.Contains("CampaignUpdateExecutionOn"))
                 {
                     fileList.Add(fileName);
                     log.Info(fileName + " added to the list of files to process");
                 }
             }
 
-            //// Recurse into subdirectories of this directory.
-            //string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
-            //foreach (string subdirectory in subdirectoryEntries)
-            //{
-            //    //adds the other files in the directories of the path
-            //    fileList.InsertRange(0, ProcessDirectory(subdirectory));
-            //}
             return fileList;
         }
 

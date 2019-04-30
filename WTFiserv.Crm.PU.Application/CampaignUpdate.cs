@@ -33,50 +33,61 @@ namespace WTFiserv.Crm.PU.Application
             {
                 if (_service != null)
                 {
-                    log.Info("Connection succeeded!");
-
-                    List<String> fileList = ProcessDirectory(directory_path);
-                    if (fileList.Count() > 0)
+                    if (!File.Exists(directory_path + ((directory_path.EndsWith("\\")) ? "CampaignUpdateExecutionOn.txt" : "\\CampaignUpdateExecutionOn.txt")))
                     {
-                        foreach (String fileName in fileList)
-                        {
-                            try
-                            {
-                                log.Info("Loading Clients from Campaign file" + fileName);
-                                String campaignName = Path.GetFileNameWithoutExtension(fileName);
-                                Campaigns += campaignName + " ";
-                                if (campaignName.IndexOf("_")>0)
-                                {
-                                    campaignName = campaignName.Substring(0, campaignName.IndexOf("_"));
-                                }
-                                String line;
-                                char[] delimiters = new char[] { '\t' };
-                                StreamReader file = new StreamReader(fileName);
-                                Campaign campaign = GetExistingCampaign(campaignName);
-                                line = file.ReadLine();
-                                String[] headers = line.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
-
-                                ProcessCampaign(campaign);
-                                ProcessFile(fileName, _service, campaignName);
-                            }
-                            catch (Exception ex)
-                            {
-                                log.Error(ex.ToString());
-                            }
-                            log.Info("Finishing processing file " + fileName);
-                        }
+                        //if the flag file doesn't exists, the execution is finished
+                        log.Info("CampaignToolExecutionOn.txt file not found in directory path.");
+                        log.Info("Finishing execution");
+                        Environment.Exit(0);
                     }
                     else
                     {
-                        log.Info("No files to process were found in " + directory_path);
-                        SendEmailMessage(toemails, "Error while updating Campaigns. No files to process were found in " + directory_path,emailSubject);
-                        return;
+                        log.Info("Connection succeeded!");
+
+                        List<String> fileList = ProcessDirectory(directory_path);
+                        if (fileList.Count() > 0)
+                        {
+                            foreach (String fileName in fileList)
+                            {
+                                try
+                                {
+                                    log.Info("Loading Clients from Campaign file" + fileName);
+                                    String campaignName = Path.GetFileNameWithoutExtension(fileName);
+                                    Campaigns += campaignName + " ";
+                                    if (campaignName.IndexOf("_") > 0)
+                                    {
+                                        campaignName = campaignName.Substring(0, campaignName.IndexOf("_"));
+                                    }
+                                    String line;
+                                    char[] delimiters = new char[] { '\t' };
+                                    StreamReader file = new StreamReader(fileName);
+                                    Campaign campaign = GetExistingCampaign(campaignName);
+                                    line = file.ReadLine();
+                                    String[] headers = line.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+                                    ProcessCampaign(campaign);
+                                    ProcessFile(fileName, _service, campaignName);
+                                }
+                                catch (Exception ex)
+                                {
+                                    log.Error(ex.ToString());
+                                }
+                                log.Info("Finishing processing file " + fileName);
+                            }
+                        }
+                        else
+                        {
+                            log.Info("No files to process were found in " + directory_path);
+                            SendEmailMessage(toemails, "Error while updating Campaigns. No files to process were found in " + directory_path, emailSubject);
+                            return;
+                        }
                     }
+
                 }
                 else
                 {
                     log.Error("Couldn't connect to CRM...");
-                    SendEmailMessage(toemails, "Error while updating Campaigns. Couldn't connect to CRM!",emailSubject);
+                    SendEmailMessage(toemails, "Error while updating Campaigns. Couldn't connect to CRM!", emailSubject);
                 }
                 log.Info("Execution finished.");
 
@@ -101,10 +112,8 @@ namespace WTFiserv.Crm.PU.Application
                 Entity entity = new Entity("campaign");
                 entity["campaignid"] = campaign.CampaignId;
                 entity["name"] = campaign.CampaignName;
-                entity["actualstart"] = DateTime.Today; //Solution 25
+                entity["actualstart"] = DateTime.Today; 
                 entity["createdon"] = campaign.CreatedOn;
-                //entity["ownerid"] = new EntityReference("systemuser", campaign.OwnerId);
-                //entity["createdby"] = new EntityReference("systemuser", campaign.CreatedBy);
                 entity["statecode"] = new OptionSetValue(0);
                 entity["statuscode"] = new OptionSetValue(0);
                 _service.Create(entity);
@@ -116,7 +125,7 @@ namespace WTFiserv.Crm.PU.Application
                 {
                     Entity entity = new Entity("campaign");
                     entity["campaignid"] = campaign.CampaignId;
-                    entity["actualstart"] = DateTime.Today; //Solution 25
+                    entity["actualstart"] = DateTime.Today; 
                     _service.Update(entity);
                 }
             }
@@ -126,7 +135,6 @@ namespace WTFiserv.Crm.PU.Application
         {
             QueryExpression query = new QueryExpression();
             query.EntityName = "campaign";
-            //query.ColumnSet = new ColumnSet(new string[] { "name","actualstart" });
             query.ColumnSet = new ColumnSet("name", "actualstart");
             query.Criteria.AddCondition(new ConditionExpression
             {
@@ -148,8 +156,6 @@ namespace WTFiserv.Crm.PU.Application
                 {
                     CampaignId = Guid.NewGuid(),
                     CampaignName = campaignName,
-                    //CreatedBy = UserId,
-                    //OwnerId = UserId,
                     CreatedOn = DateTime.Now,
                     IsNew = true,
                 };
