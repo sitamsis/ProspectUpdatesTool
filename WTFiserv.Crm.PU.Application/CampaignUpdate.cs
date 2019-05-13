@@ -33,7 +33,7 @@ namespace WTFiserv.Crm.PU.Application
             {
                 if (_service != null)
                 {
-                    if (!File.Exists(directory_path + ((directory_path.EndsWith("\\")) ? "CampaignUpdateExecutionOn.txt" : "\\CampaignUpdateExecutionOn.txt")))
+                    if (!File.Exists(directory_path + (directory_path.EndsWith("\\") ? "CampaignUpdateExecutionOn.txt" : "\\CampaignUpdateExecutionOn.txt")))
                     {
                         //if the flag file doesn't exists, the execution is finished
                         log.Info("CampaignToolExecutionOn.txt file not found in directory path.");
@@ -53,17 +53,12 @@ namespace WTFiserv.Crm.PU.Application
                                 {
                                     log.Info("Loading Clients from Campaign file" + fileName);
                                     String campaignName = Path.GetFileNameWithoutExtension(fileName);
-                                    Campaigns += campaignName + " ";
+                                    Campaigns += campaignName + ", ";
                                     if (campaignName.IndexOf("_") > 0)
                                     {
                                         campaignName = campaignName.Substring(0, campaignName.IndexOf("_"));
                                     }
-                                    String line;
-                                    char[] delimiters = new char[] { '\t' };
-                                    StreamReader file = new StreamReader(fileName);
                                     Campaign campaign = GetExistingCampaign(campaignName);
-                                    line = file.ReadLine();
-                                    String[] headers = line.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
 
                                     ProcessCampaign(campaign);
                                     ProcessFile(fileName, _service, campaignName);
@@ -90,8 +85,8 @@ namespace WTFiserv.Crm.PU.Application
                     SendEmailMessage(toemails, "Error while updating Campaigns. Couldn't connect to CRM!", emailSubject);
                 }
                 log.Info("Execution finished.");
-
-                //SendEmailMessage(toemails, "Campaigns for the files " + Campaigns + " is updated!",emailSubject);
+                Campaigns = Campaigns.Substring(0, Campaigns.Length - 1);
+                SendEmailMessage(toemails, "Campaigns for the files " + Campaigns + " is updated!",emailSubject);
                 MoveFilesToArchive(directory_path, archive_path,"Campaign");
                 DeleteArchiveFiles(archive_path);
             }

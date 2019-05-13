@@ -5,14 +5,10 @@ using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace WTFiserv.Crm.PU.Application
 {
@@ -261,7 +257,7 @@ namespace WTFiserv.Crm.PU.Application
             public Guid OwnerId { get; set; }
             public Guid CreatedBy { get; set; }
             public bool IsNew { get; set; }
-            public bool hasActualStart { get; set; } //Solution 25
+            public bool hasActualStart { get; set; } 
         }
 
         public static void MoveFilesToArchive(string srcDir, string destDir,string process="")
@@ -283,9 +279,12 @@ namespace WTFiserv.Crm.PU.Application
                     }
                     else
                     {
-                        fileName = string.Concat(Path.GetFileNameWithoutExtension(file), DateTime.Now.ToString("yyyyMMddHHmmssfff"), Path.GetExtension(file));
-                        destFileName = Path.Combine(destDir, fileName);
-                        File.Move(file, destFileName);
+                        if (!file.Contains("CampaignUpdateExecutionOn"))
+                        {
+                            fileName = string.Concat(Path.GetFileNameWithoutExtension(file), Path.GetExtension(file));
+                            destFileName = Path.Combine(destDir, fileName);
+                            File.Move(file, destFileName);
+                        }
                     }
                 }
             }
