@@ -65,7 +65,9 @@ namespace WTFiserv.Crm.PU.Application
                                 }
                                 catch (Exception ex)
                                 {
-                                    log.Error(ex.ToString());
+                                    log.Info("Error occured" + ex.Message);
+                                    SendEmailMessage(toemails, "Error while updating Campaigns. " + ex.Message, emailSubject);
+                                    return;
                                 }
                                 log.Info("Finishing processing file " + fileName);
                             }

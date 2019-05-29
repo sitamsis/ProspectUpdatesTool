@@ -94,6 +94,10 @@ namespace WTFiserv.Crm.PU.Application
                         AccountMetadata = GetMetadata("account", service, headers);
 
                         int idindx = headers.IndexOf("accountid");
+                        if(idindx < 0)
+                        {
+                            throw new Exception("Column accountid could not found or wrongly spelled in the file " + path);
+                        }
                         while (!csvreader.EndOfStream)
                         {
                             try
@@ -232,6 +236,7 @@ namespace WTFiserv.Crm.PU.Application
                             catch (Exception ex)
                             {
                                 log.Error("Error:" + ex.ToString());
+                                throw ex;
                             }
                         }
                     }
